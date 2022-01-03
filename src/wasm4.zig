@@ -35,16 +35,16 @@ pub const Gamepad = packed struct {
     button_up: bool,
     button_down: bool,
     comptime {
-        if(@sizeOf(@This()) != @sizeOf(u8)) unreachable;
+        if (@sizeOf(@This()) != @sizeOf(u8)) unreachable;
     }
 
     pub fn format(value: @This(), comptime _: []const u8, _: @import("std").fmt.FormatOptions, writer: anytype) !void {
-        if(value.button_1) try writer.writeAll("1");
-        if(value.button_2) try writer.writeAll("2");
-        if(value.button_left) try writer.writeAll("<");//"←");
-        if(value.button_right) try writer.writeAll(">");
-        if(value.button_up) try writer.writeAll("^");
-        if(value.button_down) try writer.writeAll("v");
+        if (value.button_1) try writer.writeAll("1");
+        if (value.button_2) try writer.writeAll("2");
+        if (value.button_left) try writer.writeAll("<"); //"←");
+        if (value.button_right) try writer.writeAll(">");
+        if (value.button_up) try writer.writeAll("^");
+        if (value.button_down) try writer.writeAll("v");
     }
 };
 
@@ -52,11 +52,8 @@ pub const Mouse = packed struct {
     x: i16,
     y: i16,
     buttons: MouseButtons,
-    pub fn pos(mouse: Mouse) Vec2 {
-        return .{mouse.x, mouse.y};
-    }
     comptime {
-        if(@sizeOf(@This()) != 5) unreachable;
+        if (@sizeOf(@This()) != 5) unreachable;
     }
 };
 
@@ -66,7 +63,7 @@ pub const MouseButtons = packed struct {
     middle: bool,
     _: u5 = 0,
     comptime {
-        if(@sizeOf(@This()) != @sizeOf(u8)) unreachable;
+        if (@sizeOf(@This()) != @sizeOf(u8)) unreachable;
     }
 };
 
@@ -75,7 +72,7 @@ pub const SystemFlags = packed struct {
     hide_gamepad_overlay: bool,
     _: u6 = 0,
     comptime {
-        if(@sizeOf(@This()) != @sizeOf(u8)) unreachable;
+        if (@sizeOf(@This()) != @sizeOf(u8)) unreachable;
     }
 };
 
@@ -89,11 +86,28 @@ pub const SYSTEM_HIDE_GAMEPAD_OVERLAY: u8 = 2;
 // └───────────────────────────────────────────────────────────────────────────┘
 
 /// Copies pixels to the framebuffer.
-pub extern fn blit(sprite: [*]const u8, x: i32, y: i32, width: i32, height: i32, flags: u32) void;
+pub fn blit(sprite: []const u8, x: i32, y: i32, width: i32, height: i32, flags: BlitFlags) void {
+    externs.blit(sprite.ptr, x, y, width, height, @bitCast(u32, flags));
+}
 
 /// Copies a subregion within a larger sprite atlas to the framebuffer.
-pub extern fn blitSub(sprite: [*]const u8, x: i32, y: i32, width: i32, height: i32, src_x: u32, src_y: u32, stride: i32, flags: u32) void;
+pub fn blitSub(sprite: []const u8, x: i32, y: i32, width: i32, height: i32, src_x: u32, src_y: u32, strie: i32, flags: BlitFlags) void {
+    externs.blitSub(sprite.ptr, x, y, width, height, src_x, src_y, strie, @bitCast(u32, flags));
+}
 
+pub const BlitFlags = packed struct {
+    bpp: enum(u1) {
+        b1,
+        b2,
+    },
+    flip_x: bool = false,
+    flip_y: bool = false,
+    rotate: bool = false,
+    _: u28 = 0,
+    comptime {
+        if (@sizeOf(@This()) != @sizeOf(u32)) unreachable;
+    }
+};
 pub const BLIT_2BPP: u32 = 1;
 pub const BLIT_1BPP: u32 = 0;
 pub const BLIT_FLIP_X: u32 = 2;
@@ -128,6 +142,9 @@ pub extern fn hline(x: i32, y: i32, len: u32) void;
 // └───────────────────────────────────────────────────────────────────────────┘
 
 const externs = struct {
+    extern fn blit(sprite: [*]const u8, x: i32, y: i32, width: i32, height: i32, flags: u32) void;
+    extern fn blitSub(sprite: [*]const u8, x: i32, y: i32, width: i32, height: i32, src_x: u32, src_y: u32, strie: i32, flags: u32) void;
+
     extern fn tone(frequency: u32, duration: u32, volume: u32, flags: u32) void;
 };
 
@@ -140,7 +157,7 @@ pub const ToneFrequency = packed struct {
     end: u16 = 0,
 
     comptime {
-        if(@sizeOf(@This()) != @sizeOf(u32)) unreachable;
+        if (@sizeOf(@This()) != @sizeOf(u32)) unreachable;
     }
 };
 
@@ -151,7 +168,7 @@ pub const ToneDuration = packed struct {
     attack: u8 = 0,
 
     comptime {
-        if(@sizeOf(@This()) != @sizeOf(u32)) unreachable;
+        if (@sizeOf(@This()) != @sizeOf(u32)) unreachable;
     }
 };
 
@@ -174,7 +191,7 @@ pub const ToneFlags = packed struct {
     _: u4 = 0,
 
     comptime {
-        if(@sizeOf(@This()) != @sizeOf(u8)) unreachable;
+        if (@sizeOf(@This()) != @sizeOf(u8)) unreachable;
     }
 };
 
