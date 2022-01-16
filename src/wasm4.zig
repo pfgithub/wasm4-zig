@@ -117,13 +117,13 @@ pub const ctx = Tex(.mut){
 };
 
 pub const Gamepad = packed struct {
-    button_1: bool,
-    button_2: bool,
+    button_1: bool = false,
+    button_2: bool = false,
     _: u2 = 0,
-    button_left: bool,
-    button_right: bool,
-    button_up: bool,
-    button_down: bool,
+    button_left: bool = false,
+    button_right: bool = false,
+    button_up: bool = false,
+    button_down: bool = false,
     comptime {
         if (@sizeOf(@This()) != @sizeOf(u8)) unreachable;
     }
@@ -139,9 +139,9 @@ pub const Gamepad = packed struct {
 };
 
 pub const Mouse = packed struct {
-    x: i16,
-    y: i16,
-    buttons: MouseButtons,
+    x: i16 = 0,
+    y: i16 = 0,
+    buttons: MouseButtons = .{},
     pub fn pos(mouse: Mouse) Vec2 {
         return .{ mouse.x, mouse.y };
     }
@@ -151,9 +151,9 @@ pub const Mouse = packed struct {
 };
 
 pub const MouseButtons = packed struct {
-    left: bool,
-    right: bool,
-    middle: bool,
+    left: bool = false,
+    right: bool = false,
+    middle: bool = false,
     _: u5 = 0,
     comptime {
         if (@sizeOf(@This()) != @sizeOf(u8)) unreachable;
@@ -180,7 +180,7 @@ pub const SYSTEM_HIDE_GAMEPAD_OVERLAY: u8 = 2;
 
 pub const externs = struct {
     pub extern fn blit(sprite: [*]const u8, x: i32, y: i32, width: i32, height: i32, flags: u32) void;
-    pub extern fn blitSub(sprite: [*]const u8, x: i32, y: i32, width: i32, height: i32, src_x: u32, src_y: u32, strie: i32, flags: u32) void;
+    pub extern fn blitSub(sprite: [*]const u8, x: i32, y: i32, width: i32, height: i32, src_x: i32, src_y: i32, strie: i32, flags: u32) void;
     pub extern fn line(x1: i32, y1: i32, x2: i32, y2: i32) void;
     pub extern fn oval(x: i32, y: i32, width: i32, height: i32) void;
     pub extern fn rect(x: i32, y: i32, width: i32, height: i32) void;
@@ -197,13 +197,11 @@ pub const externs = struct {
 
 /// Copies pixels to the framebuffer.
 pub fn blit(sprite: []const u8, pos: Vec2, size: Vec2, flags: BlitFlags) void {
-    if (sprite.len * 8 != size[x] * size[y]) unreachable;
     externs.blit(sprite.ptr, pos[x], pos[y], size[x], size[y], @bitCast(u32, flags));
 }
 
 /// Copies a subregion within a larger sprite atlas to the framebuffer.
 pub fn blitSub(sprite: []const u8, pos: Vec2, size: Vec2, src: Vec2, strie: i32, flags: BlitFlags) void {
-    if (sprite.len * 8 != size[x] * size[y]) unreachable;
     externs.blitSub(sprite.ptr, pos[x], pos[y], size[x], size[y], src[x], src[y], strie, @bitCast(u32, flags));
 }
 
