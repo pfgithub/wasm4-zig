@@ -1,3 +1,5 @@
+A game using a modified version of these bindings: https://github.com/pfgithub/w4test
+
 # wasm4-zig
 
 idiomatic zig wasm4 template
